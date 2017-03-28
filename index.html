@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            button {
+                margin: 10px;
+            }
+            .container {
+                text-align: center;
+            }
+            .title {
+                padding: 10px 0;
+                font-family: Garamond;
+            }
+            svg {
+                border: solid thin #00c3ff;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="title">
+                <span>Click to Play Snake!</span> <button id="start">Start</button>
+            </div>
+        </div>
+    </body>
+<script type="text/javascript" src="snake.js"></script>
+<script type="text/javascript">
+
+    window.addEventListener("load", function () {
+
+        var height = width = 500;
+        var squareWidth = 20;
+        var dimensions = height/squareWidth;
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", width);
+        svg.setAttribute("height", height);
+        setBoard(squareWidth, height, width, "#00c3ff", 2);
+        document.querySelector(".container").appendChild(svg);
+
+        function setBoard (squareWidth, boardHeight, boardWidth, gridColor, gridRadius) {        
+            for (let i = 0; i < boardHeight/squareWidth; i++) {
+                for (let j = 0; j < boardWidth/squareWidth; j++) {            
+                    var square = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    square.setAttribute("id",i + "," + j)
+                    square.setAttribute("x", i*squareWidth);
+                    square.setAttribute("y", j*squareWidth);
+                    square.setAttribute("width", squareWidth);
+                    square.setAttribute("height", squareWidth);
+                    square.setAttribute("rx", gridRadius);
+                    square.setAttribute("rx", gridRadius);
+                    square.style.setProperty("fill", "white");
+                    square.style.setProperty("stroke", gridColor);
+                    svg.appendChild(square);
+                }
+            }
+        }
+
+        function clearBoard () {
+            var boardHeight = +svg.getAttribute("height");
+            var boardWidth = +svg.getAttribute("width");
+            var squareWidth = +document.querySelector("rect").getAttribute("width");
+
+            for (let i = 0; i < boardHeight/squareWidth; i++) {
+                for (let j = 0; j < boardWidth/squareWidth; j++) {
+                    var coord = i + "," + j;             
+                    var square = document.getElementById(coord);
+                    square.style.setProperty("fill", "white");
+                }
+            }
+        }
+
+        var directionObject = {direction: "ArrowDown"};
+        window.addEventListener("keydown", function(event) {
+
+            if (["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(event.key)) {
+                event.preventDefault();
+                directionObject.direction = event.key;
+            }
+        });
+
+
+        var startButton = document.getElementById("start");
+        startButton.addEventListener("click", run);
+
+        function run (event) {
+            var stop;
+            startButton.setAttribute("disabled", "true");
+            clearBoard();
+
+            var startGamePromise = new Promise(function(resolve, reject) {
+                start(event, resolve);
+            });
+            
+            startGamePromise.then(function(resolved) {
+                startButton.removeAttribute("disabled");
+                directionObject.direction = "ArrowDown";
+                clearInterval(stop);
+                alert(resolved);
+            });
+
+            function start (event, resolve) {
+                var snake = new Snake(dimensions);
+                stop = setInterval(function() {
+                    snake.go(directionObject, resolve);
+                }, 100);
+            }
+        }
+    });
+</script>
+</html>
