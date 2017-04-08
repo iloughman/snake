@@ -1,7 +1,7 @@
 class Snake {
     
     constructor (dimensions) {
-        this.snakeList = new LinkedSnakeList(dimensions);
+        this.snakeList = new SnakeArray(dimensions);
     }
 
     go (directionObject, resolve) {
@@ -9,35 +9,31 @@ class Snake {
     }
 }
 
-class LinkedSnakeList {
+class SnakeArray {
 
     constructor (dimensions) {
-        this.tail = new SnakeNode(dimensions, {x:12,y:12});
-        this.tail.turnOn();
-        this.head = new SnakeNode(dimensions, {x:12,y:13});
-        this.head.turnOn();
+        this.snake = [new SnakeNode(dimensions, {x:12,y:12})];
+        this.snake[0].turnOn();
+        this.snake.push(new SnakeNode(dimensions, {x:12,y:13}));
+        this.snake[1].turnOn();
         this.foodNode = new SnakeNode(dimensions);
         this.foodNode.turnOn("red");
-        this.head.next = this.tail;
-        this.tail.previous = this.head;
         this.dimensions = dimensions;
     }
     
     advanceSnakeList (directionObject, resolve) {
-        var nextLocation = this.head.nextLocation(directionObject.direction, resolve);
 
-        if (nextLocation === false) {
-            resolve("GAME OVER");
+        var nextLocation = this.snake[0].nextLocation(directionObject.direction, resolve);
+        if (!nextLocation) {
+            resolve("GAVE OVER");
             return;
         }
 
         var newNode = new SnakeNode(this.dimensions, nextLocation);
         newNode.turnOn();
-        this.head.previous = newNode;
-        newNode.next = this.head;
-        this.head = newNode;
+        this.snake.unshift(newNode);
 
-        if (newNode.collidesWithList(this)) {
+        if (newNode.collidesWithList(this.snake)) {
             resolve("GAME OVER");
             return;
         }
@@ -45,7 +41,7 @@ class LinkedSnakeList {
         if (newNode.willHitNode(this.foodNode)) {
             this.foodNode = new SnakeNode(this.dimensions);
 
-            while (this.foodNode.collidesWithList(this)) {
+            while (this.foodNode.collidesWithList(this.snake)) {
                 this.foodNode = new SnakeNode(this.dimensions);
             }
             
@@ -53,9 +49,7 @@ class LinkedSnakeList {
             return;
         }
 
-        this.tail.turnOff();
-        this.tail.previous.next = null;
-        this.tail = this.tail.previous;
+        this.snake.pop().turnOff();
     }
 }
 
@@ -83,14 +77,14 @@ class SnakeNode {
     }
 
     collidesWithList (list) {
-        var currentNode = list.head;
+        var index = 1;
         var collision = false;
-        while (currentNode.next) {
-            if (this.willHitNode(currentNode.next)) {
+        while (list[index]) {
+            if (this.willHitNode(list[index])) {
                 collision = true;
                 break;
             }
-            currentNode = currentNode.next;
+            index++;
         }
         return collision;
     }

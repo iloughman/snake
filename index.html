@@ -70,7 +70,7 @@
             }
         }
 
-        var directionObject = {direction: "ArrowDown"};
+        var directionObject = {direction: "ArrowUp"};
         window.addEventListener("keydown", function(event) {
 
             if (["ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft"].includes(event.key)) {
@@ -94,7 +94,7 @@
             
             startGamePromise.then(function(resolved) {
                 startButton.removeAttribute("disabled");
-                directionObject.direction = "ArrowDown";
+                directionObject.direction = "ArrowUp";
                 clearInterval(stop);
                 alert(resolved);
             });
